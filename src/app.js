@@ -39,7 +39,9 @@ app.post('/participants', async (req, res) => {
         // se nao existir retorna nulo e nao entra no if
         if(existeNome) return res.status(409).send("usuario ja cadastrado");
         
+        // inserir participante com lasStatus incluido no obj
         await db.collection('participants').insertOne(novoModelo);
+        
         // res.send("Participante adicionado com sucesso")
         // montar mensagem de post na colleciton mensagem
         const mensagemEntrou = { 
@@ -52,7 +54,7 @@ app.post('/participants', async (req, res) => {
 
         // realizar post na collection mensagem
         await db.collection('messages').insertOne(mensagemEntrou);
-        res.send("mensagem e participante criados com sucesso")
+        res.status(201).send("mensagem e participante criados com sucesso")
         // res.sendStatus(201);
 
     } catch (error) {
@@ -83,19 +85,24 @@ app.get('/messages', async (req, res) => {
     const {limit} = req.query
 
     try {
+      // se nao houver mensagens retorna o array vazio mesmo
       const messages = await db.collection('messages').find( { $or: [ { to: user }, { to: "Todos" }, {from: user} ] }).toArray()
-      if (!messages) {
-        return res.sendStatus(404);
+      if(messages[0] === null) return res.send([])
+
+      if(limit !== undefined){
+        // se limite for invalido, retorna erro, senao, continua
+        if(limit <= 0 || (limit !== undefined && isNaN(limit))){
+          return res.status(422).send("limite invalido");
+        }
+        const limitedMessages = []
+        for(let i = messages.length - 1; i > messages.length -1 - limit; i--){
+          limitedMessages.push(messages[i])
+        }
+        return res.status(201).send(limitedMessages);
       }
+
+      res.send(messages)
       
-      if(limit <= 0 || isNaN(limit)){
-        return res.sendStatus(422);
-      }
-      const limitedMessages = []
-      for(let i = messages.length - 1; i > messages.length -1 - limit; i--){
-        limitedMessages.push(messages[i])
-      }
-      res.send(limitedMessages);
     } catch (error) {
       console.error(error);
       res.sendStatus(500);
