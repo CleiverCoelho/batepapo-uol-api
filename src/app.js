@@ -92,31 +92,45 @@ app.get('/messages', async (req, res) => {
     }
   });
 
+app.post('/messages', async (req, res) => {
+  const message = req.body;
+  const {to, text, type} = req.body;
 
+  const from = req.headers.user
 
-// app.post('/products', async (req, res) => {
-//   const product = req.body;
+  const userSchema = joi.object({
+    to: joi.string().required(),
+    text: joi.string().required(),
+    type: joi.string().valid("message", "private message").required()
+  })
 
-//   const userSchema = joi.object({
-//     name: joi.string().required(),
-//     sku: joi.number().required(),
-//     price: joi.number().required()
-//   })
+  const validacao = userSchema.validate(message, {abortEarly: false})
+  if (validacao.error) {
+    const errors = validacao.error.details.map((detail) => detail.message);
+    return res.status(422).send(errors);
+  }
+  const novaMensagem = {
+    from,
+    to, 
+    text,
+    type,
+    time: dayjs().format('HH:mm:ss')
+  }
 
-//   const validacao = userSchema.validate(product, {abortEarly: false})
-//   if (validacao.error) {
-//     const errors = validacao.error.details.map((detail) => detail.message);
-//     return res.status(422).send(errors);
-//   }
+  try {
 
-//   try {
-//     await db.collection('products').insertOne(product)
-//     res.sendStatus(201);
-//   } catch (error) {
-//     console.error(error);
-//     res.sendStatus(500);
-//   }
-// });
+    const usuarioOnline = await db.collection('participants').findOne({name: from})
+    console.log(usuarioOnline)
+    if(!usuarioOnline) return res.sendStatus(422)
+
+    await db.collection("messages").insertOne(novaMensagem)
+    console.log("mensagem enviada com sucesso");
+    res.sendStatus(201);
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
 
 // app.put('/customers/:id', async (req, res) => {
 //   const id = req.params.id;
