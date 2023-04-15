@@ -80,14 +80,22 @@ app.get('/participants', async (req, res) => {
 app.get('/messages', async (req, res) => {
 
     const {user} = req.headers
+    const {limit} = req.query
 
     try {
       const messages = await db.collection('messages').find( { $or: [ { to: user }, { to: "Todos" }, {from: user} ] }).toArray()
       if (!messages) {
         return res.sendStatus(404);
       }
-  
-      res.send(messages);
+      
+      if(limit <= 0 || isNaN(limit)){
+        return res.sendStatus(422);
+      }
+      const limitedMessages = []
+      for(let i = messages.length - 1; i > messages.length -1 - limit; i--){
+        limitedMessages.push(messages[i])
+      }
+      res.send(limitedMessages);
     } catch (error) {
       console.error(error);
       res.sendStatus(500);
