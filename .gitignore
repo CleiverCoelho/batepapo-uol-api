@@ -44,6 +44,9 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 #node_modules nao deve ir nunca
 node_modules
 
+#.env nao deve ser commitada posi o server tem seu proprio
+.env
+
 # Runtime data
 pids
 *.pid
