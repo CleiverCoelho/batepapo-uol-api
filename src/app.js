@@ -16,6 +16,22 @@ try {
   console.log(err.message);
 }
 
+setInterval(async () => {
+  const participants = await db.collection('participants')
+    .find({lastStatus: {$lt: Date.now() - 10}})
+    .toArray();
+    try {
+      participants.forEach((participant) => {
+        db.collection('participants').deleteOne(participant)
+          .then((res) => {
+            console.log(res)
+          }).catch(err => console.log(err))
+      })  
+    } catch (err) {
+      console.log(err);
+   }
+  }, 5000)
+
 const db = mongoClient.db();
 
 const app = express();
@@ -201,7 +217,7 @@ app.delete('/messages/:id', async (req, res) => {
   if(!existeMensagem) return res.status(404).send("Mensagem nao existe")
 
   // verifica se a requisicao foi feita pelo dono da mensagem
-  if(user !== existeMensagem.from) return res.status(404).send("usuario nao pode deletar mensagem");
+  if(user !== existeMensagem.from) return res.status(401).send("usuario nao pode deletar mensagem");
   try {
 
     await db.collection('messages').deleteOne({ _id: new ObjectId(idMessage) })
@@ -234,7 +250,7 @@ app.put('/messages/:id', async (req, res) => {
   console.log(existeMensagem)
   if(!existeMensagem) return res.status(404).send("Mensagem nao existe")
 
-  if(user !== existeMensagem.from) return res.status(404).send("usuario nao pode editar mensagem");
+  if(user !== existeMensagem.from) return res.status(401).send("usuario nao pode editar mensagem");
 
   try {
     await db.collection("messages").updateOne(
