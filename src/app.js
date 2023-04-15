@@ -96,12 +96,15 @@ app.get('/messages', async (req, res) => {
         }
         const limitedMessages = []
         for(let i = messages.length - 1; i > messages.length -1 - limit; i--){
+          if(messages[i] === undefined) {
+            break
+          }
           limitedMessages.push(messages[i])
         }
-        return res.status(201).send(limitedMessages);
+        return res.status(200).send(limitedMessages);
       }
 
-      res.send(messages)
+      res.status(200).send(messages)
       
     } catch (error) {
       console.error(error);
