@@ -3,6 +3,7 @@ import express from 'express';
 import { MongoClient, ObjectId } from 'mongodb';
 import dotenv from 'dotenv';
 import joi from 'joi';
+import dayjs from 'dayjs';
 
 dotenv.config();
 
@@ -39,7 +40,21 @@ app.post('/participants', async (req, res) => {
         if(existeNome) return res.status(409).send("usuario ja cadastrado");
         
         await db.collection('participants').insertOne(novoModelo);
-        res.send("Participante adicionado com sucesso")
+        // res.send("Participante adicionado com sucesso")
+        // montar mensagem de post na colleciton mensagem
+        const mensagemEntrou = { 
+            from: name,
+            to: 'Todos',
+            text: 'entra na sala...',
+            type: 'status',
+            time: dayjs().format('HH:mm:ss')
+        }
+
+        // realizar post na collection mensagem
+        await db.collection('messages').insertOne(mensagemEntrou);
+        res.send("mensagem e participante criados com sucesso")
+        // res.sendStatus(201);
+
     } catch (error) {
         
         console.error(error);
@@ -61,6 +76,22 @@ app.get('/participants', async (req, res) => {
     res.sendStatus(500);
   }
 });
+
+app.get('/messages', async (req, res) => {
+
+    try {
+      const messages = await db.collection('messages').find().toArray()
+      if (!messages) {
+        return res.sendStatus(404);
+      }
+  
+      res.send(messages);
+    } catch (error) {
+      console.error(error);
+      res.sendStatus(500);
+    }
+  });
+
 
 
 // app.post('/products', async (req, res) => {
