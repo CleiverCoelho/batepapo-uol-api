@@ -152,6 +152,39 @@ app.post('/messages', async (req, res) => {
   }
 });
 
+app.post('/status', async (req, res) => {
+  const user = req.headers.user
+
+  const userSchema = joi.object({
+    user: joi.string().required()
+  })
+
+  // validacao de user usando joi
+  const validacao = userSchema.validate({user}, {abortEarly: false})
+  if(validacao.error) {
+    return res.status(404).send(validacao.error.details);
+  }
+
+  // verificar se o usuario consta na lista atual de participants
+  const existeNome = await db.collection('participants').findOne({name: user});
+  // se nao existir retorna nulo e nao entra no if
+  if(!existeNome) return res.status(404).send("usuario nao existe");
+
+  try {
+
+    const atualizacao = await db.collection('participants').updateOne(
+      {name: user}, 
+      {$set: {lastStatus: Date.now()}}
+    )
+    if(atualizacao.modifiedCount === 0) return res.status(404).send("nao foi possivel atualizar status")
+
+    res.status(200).send("last status atualizado com sucesso")
+  } catch (error) {
+    console.error(error);
+    res.sendStatus(500);
+  }
+});
+
 // app.put('/customers/:id', async (req, res) => {
 //   const id = req.params.id;
 //   const {name, sku, price} = req.body;
