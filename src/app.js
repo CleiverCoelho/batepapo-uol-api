@@ -30,7 +30,7 @@ setInterval(async () => {
     } catch (err) {
       console.log(err);
    }
-  }, 5000)
+  }, 15000)
 
 const db = mongoClient.db();
 
