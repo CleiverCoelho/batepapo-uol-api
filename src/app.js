@@ -116,7 +116,13 @@ app.post('/messages', async (req, res) => {
   const message = req.body;
   const {to, text, type} = req.body;
 
-  const from = req.headers.user
+  let from;
+
+  if(req.headers.user === undefined){
+    from = req.headers.User
+  }else{
+    from = req.headers.user
+  }
 
   const userSchema = joi.object({
     to: joi.string().required(),
