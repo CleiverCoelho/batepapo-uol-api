@@ -7,6 +7,8 @@ import dayjs from 'dayjs';
 
 dotenv.config();
 
+let countInterval = 0;
+
 const mongoClient = new MongoClient(process.env.DATABASE_URL);
 
 try {
@@ -17,16 +19,28 @@ try {
 }
 
 setInterval(async () => {
+  
   const participants = await db.collection('participants')
-    .find({lastStatus: {$lt: Date.now() - 10}})
+    .find({lastStatus: {$lt: Date.now() - 10000}})
     .toArray();
     try {
       participants.forEach((participant) => {
         db.collection('participants').deleteOne(participant)
           .then((res) => {
+            // se removeu enviar mensagem status saida
             console.log(res)
           }).catch(err => console.log(err))
       })  
+
+      participants.forEach((participant) => {
+        db.collection('messages').insertOne({
+          from: participant.name,
+          to: 'Todos',
+          text: 'sai da sala...',
+          type: 'status',
+          time: dayjs().format('HH:mm:ss')
+        })
+      })
     } catch (err) {
       console.log(err);
    }
