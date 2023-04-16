@@ -157,7 +157,7 @@ app.post('/messages', async (req, res) => {
   const userSchema = joi.object({
     to: joi.string().required(),
     text: joi.string().required(),
-    type: joi.string().valid("message", "private message").required()
+    type: joi.string().valid("message", "private_message").required()
   })
 
   const validacao = userSchema.validate(message, {abortEarly: false})
@@ -251,7 +251,7 @@ app.put('/messages/:id', async (req, res) => {
   const useSchema = joi.object({
     to: joi.string().required(),
     text: joi.string().required(),
-    type: joi.string().valid("message", "private message").required()
+    type: joi.string().valid("message", "private_message").required()
   })
 
   const validacao = useSchema.validate(req.body, {abortEarly: false});
@@ -279,61 +279,6 @@ app.put('/messages/:id', async (req, res) => {
     res.status(500).send(err)
   }
 })
-
-// /* Customers Routes */
-// app.get('/customers', async (req, res) => {
-//   try {
-//     const customers = await db.collection('customers').find().toArray();
-//     res.send(customers);
-//   } catch (err) {
-//     console.error(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.get('/customers/:id', async (req, res) => {
-//   try {
-//     const id = req.params.id;
-
-//     const customer = await db.collection('customers').findOne({ _id: new ObjectId(id) });
-
-//     if (!customer) {
-//       return res.sendStatus(404);
-//     }
-
-//     res.send(customer);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-// app.post('/customers', async (req, res) => {
-//   try {
-//     const customer = req.body;
-
-//     await db.collection('customers').insertOne(customer);
-
-//     res.sendStatus(201);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
-
-
-// app.delete('/customers/:id', async (req, res) => {
-//   try {
-//     const id = req.params.id;
-
-//     await db.collection('customers').deleteOne({ _id: new ObjectId(id) });
-
-//     res.sendStatus(200);
-//   } catch (err) {
-//     console.log(err);
-//     res.sendStatus(500);
-//   }
-// });
 
 app.listen(5000, () => {
   console.log('Server is litening on port 5000.');
